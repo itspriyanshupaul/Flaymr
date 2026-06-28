@@ -28,7 +28,7 @@ Respond with exactly this JSON structure:
       "description": "Clear explanation of the issue and how to fix it"
     }
   ],
-  "fixed_code": "The complete fixed version of the code"
+  "fixed_code": "The complete working fixed version of the code with all issues resolved. Must be syntactically correct and runnable."
 }`
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

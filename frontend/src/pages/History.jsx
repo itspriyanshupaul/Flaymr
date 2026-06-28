@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import ResultCard from '../components/ResultCard'
 
 function History() {
   const [history, setHistory] = useState([])
+  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('flaymr_history') || '[]')
@@ -11,6 +13,7 @@ function History() {
   const clearHistory = () => {
     localStorage.removeItem('flaymr_history')
     setHistory([])
+    setSelected(null)
   }
 
   const getScoreColor = (score) => {
@@ -30,10 +33,73 @@ function History() {
     return `${days}d ago`
   }
 
+  if (selected) {
+    return (
+      <div className="max-w-[760px] mx-auto px-4 sm:px-6 py-8">
+        <button
+          onClick={() => setSelected(null)}
+          className="flex items-center gap-2 text-[13px] text-gray-500 dark:text-[#888] hover:text-gray-900 dark:hover:text-white mb-6 transition-colors"
+        >
+          Back to history
+        </button>
+
+        <div className="flex items-center gap-3 mb-6">
+          <div className={`w-2.5 h-2.5 rounded-full ${getScoreColor(selected.score)}`} />
+          <div className="text-[18px] font-bold text-gray-900 dark:text-white" style={{fontFamily:'Space Grotesk,sans-serif'}}>
+            {selected.language} file
+          </div>
+          <div className="ml-auto text-[12px] text-gray-400 dark:text-[#444]" style={{fontFamily:'JetBrains Mono,monospace'}}>
+            {timeAgo(selected.time)}
+          </div>
+        </div>
+
+        {selected.result ? (
+          <ResultCard result={selected.result} />
+        ) : (
+          <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl p-8 text-center shadow-sm">
+            <div className="text-3xl mb-3">📋</div>
+            <div className="text-[15px] font-semibold text-gray-900 dark:text-white mb-2" style={{fontFamily:'Space Grotesk,sans-serif'}}>
+              {selected.score}/10
+            </div>
+            <div className="text-[13px] text-gray-500 dark:text-[#888]">
+              Full details not saved. Roast your code again to see the breakdown.
+            </div>
+          </div>
+        )}
+
+        {selected.code && (
+          <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl overflow-hidden shadow-sm mt-5">
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-[#171717]">
+              <div className="text-[14px] font-semibold text-gray-900 dark:text-white" style={{fontFamily:'Space Grotesk,sans-serif'}}>
+                Original code
+              </div>
+            </div>
+            <pre className="bg-[#111] p-5 overflow-x-auto text-[12.5px] leading-relaxed text-[#a8b5c8]" style={{fontFamily:'JetBrains Mono,monospace'}}>
+              {selected.code}
+            </pre>
+          </div>
+        )}
+
+        {selected.result?.fixed_code && (
+          <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl overflow-hidden shadow-sm mt-5">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-[#171717]">
+            <div className="text-[14px] font-semibold text-gray-900 dark:text-white" style={{fontFamily:'Space Grotesk,sans-serif'}}>
+              Fixed code
+            </div>
+          </div>
+          <pre className="bg-[#111] p-5 overflow-x-auto text-[12.5px] leading-relaxed text-[#a8b5c8]" style={{fontFamily:'JetBrains Mono,monospace'}}>
+            {selected.result.fixed_code}
+          </pre>
+        </div>
+        )}
+
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-[760px] mx-auto px-4 sm:px-6 py-8">
-      
-      {/* Header */}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-bold text-gray-900 dark:text-white tracking-tight" style={{fontFamily:'Space Grotesk,sans-serif'}}>
@@ -53,7 +119,6 @@ function History() {
         )}
       </div>
 
-      {/* Empty state */}
       {history.length === 0 && (
         <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl px-6 py-16 text-center shadow-sm">
           <div className="text-4xl mb-4">🔥</div>
@@ -66,18 +131,15 @@ function History() {
         </div>
       )}
 
-      {/* History list */}
       {history.length > 0 && (
         <div className="flex flex-col gap-3">
           {history.map((item) => (
             <div
               key={item.id}
+              onClick={() => setSelected(item)}
               className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl p-4 shadow-sm flex items-center gap-4 hover:border-orange-400 dark:hover:border-orange-500 transition-all cursor-pointer"
             >
-              {/* Score dot */}
               <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${getScoreColor(item.score)}`} />
-
-              {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-semibold text-gray-900 dark:text-white mb-0.5 truncate" style={{fontFamily:'Space Grotesk,sans-serif'}}>
                   {item.language} file
@@ -86,13 +148,9 @@ function History() {
                   {item.summary}
                 </div>
               </div>
-
-              {/* Score */}
               <div className="text-[13px] font-semibold text-orange-500 shrink-0" style={{fontFamily:'JetBrains Mono,monospace'}}>
                 {item.score}/10
               </div>
-
-              {/* Time */}
               <div className="text-[11px] text-gray-400 dark:text-[#444] shrink-0" style={{fontFamily:'JetBrains Mono,monospace'}}>
                 {timeAgo(item.time)}
               </div>
