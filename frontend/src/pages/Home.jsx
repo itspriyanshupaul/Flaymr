@@ -1,8 +1,9 @@
-import { saveRoast } from '../utils/firestore'
 import { useState } from 'react'
 import CodeEditor from '../components/CodeEditor'
 import ResultCard from '../components/ResultCard'
 import { roastCode } from '../utils/api'
+import { saveRoast } from '../utils/firestore'
+import SkeletonLoader from '../components/SkeletonLoader'
 
 function Home({ user }) {
   const [result, setResult] = useState(null)
@@ -82,11 +83,7 @@ function Home({ user }) {
       <div className="flex flex-col gap-5">
         <CodeEditor onRoast={handleRoast} loading={loading} />
 
-        {loading && (
-          <div className="h-[3px] rounded-full overflow-hidden bg-gray-100 dark:bg-[#1a1a1a]">
-            <div className="h-full bg-gradient-to-r from-orange-600 via-orange-400 to-orange-600 animate-pulse rounded-full" />
-          </div>
-        )}
+        {loading && <SkeletonLoader />}
 
         {error && (
           <div className="bg-red-50 dark:bg-[#1a0800] border border-red-200 dark:border-[#2a0800] text-red-600 dark:text-orange-400 rounded-xl px-5 py-4 text-[13px]">

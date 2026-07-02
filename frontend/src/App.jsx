@@ -6,6 +6,7 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import History from './pages/History'
 import Login from './pages/Login'
+import NotFound from './pages/NotFound'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -32,11 +33,12 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50 dark:bg-[#080808] transition-colors duration-300">
-        <Navbar user={user} />
+        {user && <Navbar user={user} />}
         <Routes>
           <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
           <Route path="/" element={<Home user={user} />} />
           <Route path="/history" element={user ? <History user={user} /> : <Navigate to="/login" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,8 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { detectLanguage } from '../utils/detectLang'
 
 function CodeEditor({ onRoast, loading }) {
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState('Python')
+
+  useEffect(() => {
+    if (code.trim()) {
+      const detected = detectLanguage(code)
+      setLanguage(detected)
+    }
+  }, [code])
 
   const handleRoast = () => {
     if (!code.trim()) return
@@ -11,7 +19,7 @@ function CodeEditor({ onRoast, loading }) {
 
   return (
     <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl p-6 shadow-sm">
-      
+
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
@@ -37,7 +45,13 @@ function CodeEditor({ onRoast, loading }) {
             <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]"></div>
           </div>
           <span className="ml-auto text-[11px] text-[#444]" style={{fontFamily:'JetBrains Mono,monospace'}}>
-            your_code.{language.toLowerCase() === 'javascript' ? 'js' : language.toLowerCase() === 'typescript' ? 'ts' : language.toLowerCase()}
+            {language.toLowerCase() === 'javascript' ? 'script.js' :
+             language.toLowerCase() === 'typescript' ? 'script.ts' :
+             language.toLowerCase() === 'python' ? 'main.py' :
+             language.toLowerCase() === 'java' ? 'Main.java' :
+             language.toLowerCase() === 'c++' ? 'main.cpp' :
+             language.toLowerCase() === 'go' ? 'main.go' :
+             language.toLowerCase() === 'rust' ? 'main.rs' : 'code.txt'}
           </span>
         </div>
         <textarea
@@ -65,6 +79,12 @@ function CodeEditor({ onRoast, loading }) {
           <option>Go</option>
           <option>Rust</option>
         </select>
+
+        {code.trim() && (
+          <span className="text-[11px] text-gray-400 dark:text-[#444]">
+            Auto-detected: <span className="text-orange-500 font-medium">{language}</span>
+          </span>
+        )}
 
         <button
           onClick={handleRoast}
