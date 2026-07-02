@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react'
 import ResultCard from '../components/ResultCard'
+import { getRoasts, deleteAllRoasts } from '../utils/firestore'
 
-function History() {
+function History({ user }) {
   const [history, setHistory] = useState([])
   const [selected, setSelected] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('flaymr_history') || '[]')
-    setHistory(data)
-  }, [])
+    const loadHistory = async () => {
+      if (user) {
+        const data = await getRoasts(user.uid)
+        setHistory(data)
+      }
+      setLoading(false)
+    }
+    loadHistory()
+  }, [user])
 
-  const clearHistory = () => {
-    localStorage.removeItem('flaymr_history')
-    setHistory([])
-    setSelected(null)
+  const clearHistory = async () => {
+    if (user) {
+      await deleteAllRoasts(user.uid)
+      setHistory([])
+      setSelected(null)
+    }
   }
 
   const getScoreColor = (score) => {
@@ -31,6 +41,21 @@ function History() {
     if (mins < 60) return `${mins}m ago`
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-[760px] mx-auto px-4 sm:px-6 py-8">
+        <div className="flex flex-col gap-3">
+          {[1,2,3].map(i => (
+            <div key={i} className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl p-4 animate-pulse">
+              <div className="h-4 bg-gray-100 dark:bg-[#1a1a1a] rounded w-1/3 mb-2"></div>
+              <div className="h-3 bg-gray-100 dark:bg-[#1a1a1a] rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   if (selected) {
@@ -82,24 +107,22 @@ function History() {
 
         {selected.result?.fixed_code && (
           <div className="bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-[#1e1e1e] rounded-2xl overflow-hidden shadow-sm mt-5">
-          <div className="px-5 py-4 border-b border-gray-100 dark:border-[#171717]">
-            <div className="text-[14px] font-semibold text-gray-900 dark:text-white" style={{fontFamily:'Space Grotesk,sans-serif'}}>
-              Fixed code
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-[#171717]">
+              <div className="text-[14px] font-semibold text-gray-900 dark:text-white" style={{fontFamily:'Space Grotesk,sans-serif'}}>
+                Fixed code
+              </div>
             </div>
+            <pre className="bg-[#111] p-5 overflow-x-auto text-[12.5px] leading-relaxed text-[#a8b5c8]" style={{fontFamily:'JetBrains Mono,monospace'}}>
+              {selected.result.fixed_code}
+            </pre>
           </div>
-          <pre className="bg-[#111] p-5 overflow-x-auto text-[12.5px] leading-relaxed text-[#a8b5c8]" style={{fontFamily:'JetBrains Mono,monospace'}}>
-            {selected.result.fixed_code}
-          </pre>
-        </div>
         )}
-
       </div>
     )
   }
 
   return (
     <div className="max-w-[760px] mx-auto px-4 sm:px-6 py-8">
-
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-bold text-gray-900 dark:text-white tracking-tight" style={{fontFamily:'Space Grotesk,sans-serif'}}>

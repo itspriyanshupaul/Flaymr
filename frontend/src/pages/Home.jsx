@@ -1,3 +1,4 @@
+import { saveRoast } from '../utils/firestore'
 import { useState } from 'react'
 import CodeEditor from '../components/CodeEditor'
 import ResultCard from '../components/ResultCard'
@@ -22,6 +23,16 @@ function Home({ user }) {
       setResult(data)
       setFixedCode(data.fixed_code)
       if (user) {
+        // Save to Firestore
+        await saveRoast(user.uid, {
+          id: Date.now(),
+          language,
+          code,
+          score: data.overall_score,
+          summary: data.summary,
+          result: data
+        })
+        // Save to localStorage as cache
         const history = getHistory()
         history.unshift({
           id: Date.now(),

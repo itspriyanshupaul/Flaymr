@@ -36,7 +36,7 @@ function App() {
         <Routes>
           <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
           <Route path="/" element={<Home user={user} />} />
-          <Route path="/history" element={user ? <History /> : <Navigate to="/login" />} />
+          <Route path="/history" element={user ? <History user={user} /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </BrowserRouter>
